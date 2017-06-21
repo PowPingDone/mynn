@@ -16,9 +16,9 @@ else:
     typedef = type(np.array([2,4])) #--used in making mono channels
     currentfile = 0
     for x in glob.glob(os.getcwd()+'/'+traindir+'/'+'*.wav'):
-        print('loading file '+x)
+        print('loading file '+x.split('/')[-1])
         tmp = wavread(x)[1]
-        print('proccessing file '+x)
+        print('proccessing file '+x.split('/')[-1])
         for x in tmp:
             if type(x) == typedef:
                 out += [np.sum(x)//len(x)]
