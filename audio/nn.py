@@ -14,7 +14,6 @@ else:
     print('create mega array of wavfiles')
     out = []
     typedef = type(np.array([2,4])) #--used in making mono channels
-    currentfile = 0
     for x in glob.glob(os.getcwd()+'/'+traindir+'/'+'*.wav'):
         print('loading file '+x.split('/')[-1])
         tmp = wavread(x)[1]
@@ -26,8 +25,9 @@ else:
                 out += x
     data = np.array(out,dtype=np.int16)
     np.save('wavfiles',data)
-    del out
+    del out,typedef
     print('saved mega array as wavfiles.npz')
+X=np.array([np.arange(len(data))])
 
 #------Create/Load model
 if os.path.isfile('model.h5'):
@@ -59,7 +59,7 @@ else:
 
 #------♪ AI Train ♪
 for x in range(5000):
-    model.fit(data,verbose=1,batch_size=10)
+    model.fit(X,data,verbose=1,batch_size=10)
     try:
         model.save('model.h5')
     except:
