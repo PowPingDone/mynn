@@ -8,8 +8,10 @@ import numpy as np
 
 #------Read wavfiles/Open numpy mega array
 if os.path.isfile('wavfiles.npz'):
+    print('load mega array of wavfiles')
     data = np.load('wavfiles.npz')
 else:
+    print('create mega array of wavfiles')
     out = []
     typedef = type(np.array([2,4])) #--used in making mono channels
     currentfile = 0
@@ -24,6 +26,7 @@ else:
                 out += x
     data = np.array(out,dtype=np.int16)
     np.save('wavfiles.npz',data)
+    print('saved mega array as wavfiles.npz')
 
 #------Create/Load model
 if os.path.isfile('model.h5'):
