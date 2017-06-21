@@ -7,9 +7,9 @@ from scipy.io.wavfile import read as wavread
 import numpy as np
 
 #------Read wavfiles/Open numpy mega array
-if os.path.isfile('wavfiles.npz'):
+if os.path.isfile('wavfiles.npy'):
     print('load mega array of wavfiles')
-    data = np.load('wavfiles.npz')
+    data = np.load('wavfiles.npy')
 else:
     print('create mega array of wavfiles')
     out = []
@@ -25,7 +25,8 @@ else:
             else:
                 out += x
     data = np.array(out,dtype=np.int16)
-    np.save('wavfiles.npz',data)
+    np.save('wavfiles',data)
+    del out
     print('saved mega array as wavfiles.npz')
 
 #------Create/Load model
@@ -37,7 +38,7 @@ else:
     print('creating new model...')
     from keras.models import Sequential
     from keras.layers import Conv1D,Activation,MaxPooling1D,LSTM,Dense,Dropout
-    from keras.optimzers import RMSprop
+    from keras.optimizers import RMSprop
     model = Sequential()
     model.add(Conv1D(32,10,padding='same',input_shape=(None,1)))
     model.add(Activation('relu'))
