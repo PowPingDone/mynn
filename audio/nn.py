@@ -55,4 +55,15 @@ else:
     model.add(LSTM(172))
     model.add(Dropout(0.35))
     model.add(Dense(1))
-    model.compile(optimizer = RMSprop())
+    model.compile(optimizer = RMSprop(), loss = 'categorical_crossentropy')
+
+#------♪ AI Train ♪
+for x in range(5000):
+    model.fit(data,verbose=1,batch_size=10)
+    try:
+        model.save('model.h5')
+    except:
+        print('let save before exiting')
+        model.save('model.h5')
+        break
+print('exiting at '+str(x)+' iterations')
