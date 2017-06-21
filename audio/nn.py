@@ -52,7 +52,6 @@ else:
     model.add(Activation('relu'))
     model.add(MaxPooling1D(pool_size=5))
     model.add(Dropout(0.2))
-    model.add(Flatten())
     model.add(LSTM(172))
     model.add(Dropout(0.35))
     model.add(Dense(1))
