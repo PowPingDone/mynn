@@ -1,5 +1,5 @@
 #------Training Dir
-traindir = 'data'
+traindir = 'shortdata'
 
 #------Imports
 import os,glob
@@ -25,9 +25,10 @@ else:
                 out += x
     data = np.array(out,dtype=np.int16)
     np.save('wavfiles',data)
+    out=None
     del out,typedef
-    print('saved mega array as wavfiles.npz')
-X=np.array([np.arange(len(data))])
+    print('saved mega array as wavfiles.npy')
+Y=np.arange(len(data))
 
 #------Create/Load model
 if os.path.isfile('model.h5'):
@@ -40,26 +41,26 @@ else:
     from keras.layers import Conv1D,Activation,MaxPooling1D,LSTM,Dense,Dropout
     from keras.optimizers import RMSprop
     model = Sequential()
-    model.add(Conv1D(64,10,padding='same',input_shape=(None,1)))
+    model.add(Conv1D(72,10,padding='casual',input_shape=(None,1)))
     model.add(Activation('relu'))
-    model.add(Conv1D(64,10))
-    model.add(Activation('relu'))
-    model.add(MaxPooling1D(pool_size=5))
-    model.add(Dropout(0.2))
-    model.add(Conv1D(128,10,padding='same'))
-    model.add(Activation('relu'))
-    model.add(Conv1D(128,10))
+    model.add(Conv1D(72,10))
     model.add(Activation('relu'))
     model.add(MaxPooling1D(pool_size=5))
     model.add(Dropout(0.2))
-    model.add(LSTM(172))
+    model.add(Conv1D(36,10,padding='casual'))
+    model.add(Activation('relu'))
+    model.add(Conv1D(36,10))
+    model.add(Activation('relu'))
+    model.add(MaxPooling1D(pool_size=5))
+    model.add(Dropout(0.2))
+    model.add(LSTM(75))
     model.add(Dropout(0.35))
     model.add(Dense(1))
     model.compile(optimizer = RMSprop(), loss = 'categorical_crossentropy')
 
 #------♪ AI Train ♪
 for x in range(5000):
-    model.fit(X,data,verbose=1,batch_size=10)
+    model.fit(data,Y,verbose=1,batch_size=10)
     try:
         model.save('model.h5')
     except:
