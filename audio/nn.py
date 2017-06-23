@@ -16,11 +16,11 @@ else:
     typedef = type(np.array([2,4])) #--used in making mono channels
     for x in glob.glob(os.getcwd()+'/'+traindir+'/'+'*.wav'):
         print('loading file '+x.split('/')[-1])
-        tmp = librosa.load(x)[0]
+        tmp = librosa.hz_to_mel(librosa.load(x)[0])
         print('proccessing file '+x.split('/')[-1])
         for x in tmp:
             out += x
-    data = np.array(out,dtype=np.int16)
+    data = np.array(out,dtype=np.float32)
     np.save('wavfiles',data)
     del out,typedef
     print('saved mega array as wavfiles.npy, exiting to clear memory')
