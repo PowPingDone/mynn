@@ -1,3 +1,4 @@
+#!/usr/bin/python
 #------Training Dir
 traindir = 'shortdata'
 
@@ -9,24 +10,23 @@ import numpy as np
 if os.path.isfile('wavfiles.npy'):
     print('load mega array of wavfiles')
     data = np.load('wavfiles.npy')
+    Y = np.load('preds.npy')
 else:
     import sys
     print('create mega array of wavfiles')
-    data = np.array([])
+    out = []
     for x in glob.glob(os.getcwd()+'/'+traindir+'/'+'*.wav'):
         print('loading file '+x.split('/')[-1])
-        tmp = librosa.hz_to_mel(librosa.load(x,mono=True)[0])
+        tmp = librosa.load(x,mono=True)[0]
         print('proccessing file '+x.split('/')[-1])
-        for x in tmp:
-            data = np.concat(data,tmp)
+        tmp = librosa.hz_to_mel(tmp)
+        out += [x for x in tmp]
+    data = np.array(out)
     np.save('wavfiles',data)
-    Y = np.array([])
-    for x in range(21,len(data)):
-        Y = np.concat(Y,data[x])
-    Y = np.concat(data[:21],Y)
+    Y = np.array([data[x] for x in range(21,len(data))] + [data[x] for x in range(20)])
+    np.save('preds',Y)
     print('saved mega array as wavfiles.npy and preds as preds.npy, exiting to clear memory')
     sys.exit(1)
-Y=np.arange(len(data))
 
 #------Create/Load model
 if os.path.isfile('model.h5'):
