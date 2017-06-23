@@ -40,12 +40,12 @@ else:
     from keras.layers import Conv1D,Activation,MaxPooling1D,LSTM,Dense,Dropout,Input
     from keras.optimizers import RMSprop
     model = Sequential()
-    model.add(Conv1D(256,10,padding = 'casual',input_shape = (None,data.shape)))
+    model.add(Conv1D(256,10,padding = 'causal', input_shape = ))
     model.add(Activation('relu'))
     model.add(Conv1D(256,10))
     model.add(Activation('relu'))
     model.add(MaxPooling1D(2))
-    model.add(Conv1D(256,10,padding = 'casual'))
+    model.add(Conv1D(256,10,padding = 'causal'))
     model.add(Activation('relu'))
     model.add(Conv1D(256,10))
     model.add(Activation('relu'))
@@ -59,8 +59,10 @@ else:
     model.compile(optimizer = RMSprop(lr = 0.00003), loss = 'categorical_crossentropy')
 
 #------♪ AI Train ♪
-for x in range(5000):
-    model.fit(data,Y,verbose=1,batch_size=10)
+itermax = 5000
+for x in range(itermax):
+    print('Iter',x,'out of',itermax,'iterations\n'+('~'*20))
+    model.fit(data,Y,verbose=1,nb_epoch=1,batch_size=10)
     try:
         model.save('model.h5')
     except KeyboardInterrupt or EOFError:
