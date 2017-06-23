@@ -2,8 +2,7 @@
 traindir = 'shortdata'
 
 #------Imports
-import os,glob
-from scipy.io.wavfile import read as wavread
+import os,glob,librosa
 import numpy as np
 
 #------Read wavfiles/Open numpy mega array
@@ -11,23 +10,21 @@ if os.path.isfile('wavfiles.npy'):
     print('load mega array of wavfiles')
     data = np.load('wavfiles.npy')
 else:
+    import sys
     print('create mega array of wavfiles')
     out = []
     typedef = type(np.array([2,4])) #--used in making mono channels
     for x in glob.glob(os.getcwd()+'/'+traindir+'/'+'*.wav'):
         print('loading file '+x.split('/')[-1])
-        tmp = wavread(x)[1]
+        tmp = librosa.load(x)[0]
         print('proccessing file '+x.split('/')[-1])
         for x in tmp:
-            if type(x) == typedef:
-                out += [np.sum(x)//len(x)]
-            else:
-                out += x
+            out += x
     data = np.array(out,dtype=np.int16)
     np.save('wavfiles',data)
-    out=None
     del out,typedef
-    print('saved mega array as wavfiles.npy')
+    print('saved mega array as wavfiles.npy, exiting to clear memory')
+    sys.exit(1)
 Y=np.arange(len(data))
 
 #------Create/Load model
@@ -38,25 +35,24 @@ if os.path.isfile('model.h5'):
 else:
     print('creating new model...')
     from keras.models import Sequential
-    from keras.layers import Conv1D,Activation,MaxPooling1D,LSTM,Dense,Dropout
-    from keras.optimizers import RMSprop
+    from keras.layers import Conv1D,Activation,MaxPooling1D,LSTM,Dense,Dropout,Input
     model = Sequential()
-    model.add(Conv1D(72,10,padding='casual',input_shape=(None,1)))
+    model.add(Input(1))
+    model.add(Conv1D(72,10,padding='casual'))
     model.add(Activation('relu'))
     model.add(Conv1D(72,10))
     model.add(Activation('relu'))
-    model.add(MaxPooling1D(pool_size=5))
-    model.add(Dropout(0.2))
+    model.add(MaxPooling1D(2))
     model.add(Conv1D(36,10,padding='casual'))
     model.add(Activation('relu'))
     model.add(Conv1D(36,10))
     model.add(Activation('relu'))
-    model.add(MaxPooling1D(pool_size=5))
-    model.add(Dropout(0.2))
-    model.add(LSTM(75))
-    model.add(Dropout(0.35))
+    model.add(MaxPooling1D(2))
+    model.add(Dropout(0.5))
+    model.add(LSTM(256))
+    model.add(Dropout(0.5))
     model.add(Dense(1))
-    model.compile(optimizer = RMSprop(), loss = 'categorical_crossentropy')
+    model.compile(optimizer = 'rmsprop', loss = 'categorical_crossentropy')
 
 #------♪ AI Train ♪
 for x in range(5000):
