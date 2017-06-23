@@ -12,18 +12,19 @@ if os.path.isfile('wavfiles.npy'):
 else:
     import sys
     print('create mega array of wavfiles')
-    out = []
-    typedef = type(np.array([2,4])) #--used in making mono channels
+    data = np.array([])
     for x in glob.glob(os.getcwd()+'/'+traindir+'/'+'*.wav'):
         print('loading file '+x.split('/')[-1])
-        tmp = librosa.hz_to_mel(librosa.load(x)[0])
+        tmp = librosa.hz_to_mel(librosa.load(x,mono=True)[0])
         print('proccessing file '+x.split('/')[-1])
         for x in tmp:
-            out += x
-    data = np.array(out,dtype=np.float32)
+            data = np.concat(data,tmp)
     np.save('wavfiles',data)
-    del out,typedef
-    print('saved mega array as wavfiles.npy, exiting to clear memory')
+    Y = np.array([])
+    for x in range(21,len(data)):
+        Y = np.concat(Y,data[x])
+    Y = np.concat(data[:21],Y)
+    print('saved mega array as wavfiles.npy and preds as preds.npy, exiting to clear memory')
     sys.exit(1)
 Y=np.arange(len(data))
 
@@ -37,17 +38,19 @@ else:
     from keras.models import Sequential
     from keras.layers import Conv1D,Activation,MaxPooling1D,LSTM,Dense,Dropout,Input
     model = Sequential()
-    model.add(Input(1))
-    model.add(Conv1D(72,10,padding='casual'))
+    model.add(Input(21))
+    model.add(Conv1D(100,10,padding='casual'))
     model.add(Activation('relu'))
-    model.add(Conv1D(72,10))
-    model.add(Activation('relu'))
-    model.add(MaxPooling1D(2))
-    model.add(Conv1D(36,10,padding='casual'))
-    model.add(Activation('relu'))
-    model.add(Conv1D(36,10))
+    model.add(Conv1D(100,10))
     model.add(Activation('relu'))
     model.add(MaxPooling1D(2))
+    model.add(Conv1D(75,10,padding='casual'))
+    model.add(Activation('relu'))
+    model.add(Conv1D(75,10))
+    model.add(Activation('relu'))
+    model.add(MaxPooling1D(2))
+    model.add(Dropout(0.5))
+    model.add(LSTM(256))
     model.add(Dropout(0.5))
     model.add(LSTM(256))
     model.add(Dropout(0.5))
@@ -59,8 +62,8 @@ for x in range(5000):
     model.fit(data,Y,verbose=1,batch_size=10)
     try:
         model.save('model.h5')
-    except:
+    except KeyboardInterrupt or EOFError:
         print('let save before exiting')
         model.save('model.h5')
         break
-print('exiting at '+str(x)+' iterations')
+print('exiting at',str(x),'iterations')
