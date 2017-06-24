@@ -7,7 +7,7 @@ import os,glob,librosa
 import numpy as np
 
 #------Read wavfiles/Open numpy mega array
-if os.path.isfile('wavfiles.npy'):
+if os.path.isfile('preds.npy') and os.path.isfile('wavfiles.npy'):
     print('load mega array of wavfiles')
     data = np.load('wavfiles.npy')
     Y = np.load('preds.npy')
@@ -19,12 +19,15 @@ else:
         print('loading file '+x.split('/')[-1])
         tmp = librosa.load(x,mono=True)[0]
         print('proccessing file '+x.split('/')[-1])
-        tmp = librosa.hz_to_mel(tmp)
-        out += list(tmp)
-    data = np.array(out)
+        tmp = np.array(librosa.feature.melspectrogram(tmp),dtype=np.float32)
+        out += [x for x in tmp[0]]
+    print('concatenating final array')
+    tmp = np.array(out,dtype=np.float32)
+    data = np.array(out,dtype=np.float32)
+    data = np.array_split(data,len(data)//128)
     np.save('wavfiles',data)
     print('create preds')
-    Y = np.array([data[x] for x in range(21,len(data))] + [data[x] for x in range(20)])
+    Y = np.array([tmp[x] for x in range(21,len(tmp))] + [tmp[x] for x in range(20)],dtype=np.float32)
     np.save('preds',Y)
     print('saved mega array as wavfiles.npy and preds as preds.npy, exiting to clear memory')
     sys.exit(1)
@@ -37,20 +40,22 @@ if os.path.isfile('model.h5'):
 else:
     print('creating new model...')
     from keras.models import Sequential
-    from keras.layers import Conv1D,Activation,MaxPooling1D,LSTM,Dense,Dropout,Input
+    from keras.layers import Conv1D,Activation,MaxPooling1D,LSTM,Dense,Dropout,Flatten
     from keras.optimizers import RMSprop
     model = Sequential()
-    model.add(Conv1D(256,10,padding = 'causal', input_shape = ))
+    model.add(Conv1D(256,10,padding = 'causal', input_shape = tuple(list(data.shape)+[1])))
     model.add(Activation('relu'))
     model.add(Conv1D(256,10))
     model.add(Activation('relu'))
     model.add(MaxPooling1D(2))
+    model.add(Dropout(0.5))
     model.add(Conv1D(256,10,padding = 'causal'))
     model.add(Activation('relu'))
     model.add(Conv1D(256,10))
     model.add(Activation('relu'))
     model.add(MaxPooling1D(2))
     model.add(Dropout(0.5))
+    model.add(Flatten())
     model.add(LSTM(256))
     model.add(Dropout(0.5))
     model.add(LSTM(256))
