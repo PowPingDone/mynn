@@ -14,7 +14,7 @@ if os.path.isfile('preds.npy') and os.path.isfile('wavfiles.npy'):
 else:
     import sys
     print('create mega array of wavfiles')
-    out = []
+    out = [0]
     for x in glob.glob(os.getcwd()+'/'+traindir+'/'+'*.wav'):
         print('loading file '+x.split('/')[-1])
         tmp = librosa.load(x,mono=True)[0]
@@ -39,25 +39,23 @@ if os.path.isfile('model.h5'):
     model = load_model('model.h5')
 else:
     print('creating new model...')
-    from keras.models import Sequential
-    from keras.layers import Conv1D,Activation,MaxPooling1D,LSTM,Dense,Dropout,Flatten
+    from keras.models import Sequential,Model
+    from keras.layers import Conv1D,Activation,MaxPooling1D,LSTM,Dense,Dropout,TimeDistributed,Flatten,Input
     from keras.optimizers import RMSprop
     model = Sequential()
-    model.add(Conv1D(256,10,padding = 'causal', input_shape = tuple(list(data.shape)+[1])))
+    model.add(Conv1D(130,10,padding = 'causal', input_shape = tuple(list(data.shape))))
     model.add(Activation('relu'))
-    model.add(Conv1D(256,10))
-    model.add(Activation('relu'))
-    model.add(MaxPooling1D(2))
-    model.add(Dropout(0.5))
-    model.add(Conv1D(256,10,padding = 'causal'))
-    model.add(Activation('relu'))
-    model.add(Conv1D(256,10))
+    model.add(Conv1D(130,10))
     model.add(Activation('relu'))
     model.add(MaxPooling1D(2))
     model.add(Dropout(0.5))
-    model.add(Flatten())
-    model.add(LSTM(256))
+    model.add(Conv1D(130,10,padding = 'causal'))
+    model.add(Activation('relu'))
+    model.add(Conv1D(130,10))
+    model.add(Activation('relu'))
+    model.add(MaxPooling1D(2))
     model.add(Dropout(0.5))
+    model.add(TimeDistributed(Flatten()))
     model.add(LSTM(256))
     model.add(Dropout(0.5))
     model.add(Dense(1))
@@ -65,13 +63,7 @@ else:
 
 #------♪ AI Train ♪
 itermax = 5000
-for x in range(itermax):
-    print('Iter',x,'out of',itermax,'iterations\n'+('~'*20))
-    model.fit(data,Y,verbose=1,nb_epoch=1,batch_size=10)
-    try:
-        model.save('model.h5')
-    except KeyboardInterrupt or EOFError:
-        print('let save before exiting')
-        model.save('model.h5')
-        break
+from keras.callbacks import ModelCheckpoint
+callback = [ModelCheckpoint('model.h5', monitor='val_acc', verbose=1, save_best_only=True, mode='max')]
+model.fit(data, Y, verbose=1, epochs=itermax, batch_size=1, callbacks=callback)
 print('exiting at',str(x),'iterations')
