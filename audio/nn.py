@@ -22,12 +22,11 @@ else:
         tmp = np.array(librosa.feature.melspectrogram(tmp),dtype=np.float32)
         out += [x for x in tmp[0]]
     print('concatenating final array')
-    tmp = np.array(out,dtype=np.float32)
-    data = np.array(out,dtype=np.float32)
-    data = np.array_split(data,len(data)//128)
+    tmp = data = np.array(out,dtype=np.float32)
+    data = np.array(np.array_split(np.array(np.array_split(data,len(data)//128)),1))
     np.save('wavfiles',data)
     print('create preds')
-    Y = np.array([tmp[x] for x in range(21,len(tmp))] + [tmp[x] for x in range(20)],dtype=np.float32)
+    Y = np.array([tmp[x] for x in range(129,len(tmp))] + [tmp[x] for x in range(128)],dtype=np.float32)
     np.save('preds',Y)
     print('saved mega array as wavfiles.npy and preds as preds.npy, exiting to clear memory')
     sys.exit(1)
@@ -39,8 +38,8 @@ if os.path.isfile('model.h5'):
     model = load_model('model.h5')
 else:
     print('creating new model...')
-    from keras.models import Sequential,Model
-    from keras.layers import Conv1D,Activation,MaxPooling1D,LSTM,Dense,Dropout,TimeDistributed,Flatten,Input
+    from keras.models import Sequential
+    from keras.layers import Conv1D,Activation,MaxPooling1D,LSTM,Dense,Dropout,TimeDistributed,Flatten
     from keras.optimizers import RMSprop
     model = Sequential()
     model.add(Conv1D(130,10,padding = 'causal', input_shape = tuple([1]+list(data.shape))))
