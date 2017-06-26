@@ -43,7 +43,7 @@ else:
     from keras.layers import Conv1D,Activation,MaxPooling1D,LSTM,Dense,Dropout,TimeDistributed,Flatten,Input
     from keras.optimizers import RMSprop
     model = Sequential()
-    model.add(Conv1D(130,10,padding = 'causal', input_shape = tuple(list(data.shape))))
+    model.add(Conv1D(130,10,padding = 'causal', input_shape = tuple([1]+list(data.shape))))
     model.add(Activation('relu'))
     model.add(Conv1D(130,10))
     model.add(Activation('relu'))
