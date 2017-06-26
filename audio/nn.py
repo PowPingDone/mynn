@@ -23,10 +23,10 @@ else:
         out += [x for x in tmp[0]]
     print('concatenating final array')
     tmp = data = np.array(out,dtype=np.float32)
-    data = np.array(np.array_split(np.array(np.array_split(data,len(data)//128)),1))
+    data = np.array_split(np.array(np.array_split(np.array(np.array_split(data,len(tmp)//128)),1)),1)
     np.save('wavfiles',data)
     print('create preds')
-    Y = np.array([tmp[x] for x in range(129,len(tmp))] + [tmp[x] for x in range(128)],dtype=np.float32)
+    Y = np.array_split(np.array(np.array_split(np.array([tmp[x] for x in range(129,len(tmp),128)] + tmp[128],dtype=np.float32),len(tmp)//128)),1)
     np.save('preds',Y)
     print('saved mega array as wavfiles.npy and preds as preds.npy, exiting to clear memory')
     sys.exit(1)
@@ -42,7 +42,7 @@ else:
     from keras.layers import Conv1D,Activation,MaxPooling1D,LSTM,Dense,Dropout,TimeDistributed,Flatten
     from keras.optimizers import RMSprop
     model = Sequential()
-    model.add(Conv1D(130,10,padding = 'causal', input_shape = tuple([1]+list(data.shape))))
+    model.add(Conv1D(130,10,padding = 'causal', input_shape = data.shape[1:]))
     model.add(Activation('relu'))
     model.add(Conv1D(130,10))
     model.add(Activation('relu'))
@@ -55,9 +55,9 @@ else:
     model.add(MaxPooling1D(2))
     model.add(Dropout(0.5))
     model.add(TimeDistributed(Flatten()))
-    model.add(LSTM(256))
+    model.add(LSTM(256, return_sequences = True))
     model.add(Dropout(0.5))
-    model.add(Dense(1))
+    model.add(TimeDistributed(Dense(1)))
     model.compile(optimizer = RMSprop(lr = 0.00003), loss = 'categorical_crossentropy')
 
 #------♪ AI Train ♪
