@@ -29,12 +29,10 @@ else:
     print('create mega array')
     data = np.array([[tmp[x:x+128]] for x in range(0,len(tmp)-128,4)])
     data = np.array([x[0] for x in data])
-    data = np.array(np.array_split(np.array(np.array_split(data,1)),1))
     np.save('wavfiles',data)
     print('create preds')
     Y = [[x] for x in tmp[129:len(tmp):4]]
     Y = np.array(Y,dtype=np.float32)
-    Y = np.array_split(np.array(np.array_split(Y,1)),1)
     np.save('preds',Y)
     print('saved mega array as wavfiles.npy and preds as preds.npy, exiting to clear memory')
     sys.exit(1)
@@ -50,7 +48,7 @@ else:
     from keras.layers import Activation,LSTM,Dense,Dropout,TimeDistributed
     from keras.optimizers import RMSprop
     model = Sequential()
-    model.add(LSTM(128, input_shape = data.shape[2:], return_sequences=False))
+    model.add(LSTM(128, input_shape = data.shape, return_sequences=False))
     model.add(Dropout(0.4))
     model.add(Dense(1))
     model.add(Activation('softmax'))
@@ -60,5 +58,5 @@ else:
 itermax = 100
 from keras.callbacks import ModelCheckpoint
 callback = [ModelCheckpoint('model.h5', monitor='val_acc', verbose=1, save_best_only=True, mode='max')]
-model.fit(data[0,0], Y[0,0], verbose=1, epochs=itermax, batch_size=1, callbacks=callback)
+model.fit(data, Y, verbose=1, epochs=itermax, batch_size=1, callbacks=callback)
 print('exiting at',str(x),'iterations')
