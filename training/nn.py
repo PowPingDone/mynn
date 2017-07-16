@@ -34,11 +34,6 @@ for x in project_submissions:
     x['completion_date'] = parse_date(x['completion_date'])
     x['creation_date'] = parse_date(x['creation_date'])
 
-def num_rows(y):
-    accum = 0
-    for x in y[0]:
-        accum += 1
-    return accum
 
 def unique_students(y):
     ids = set([])
@@ -49,11 +44,11 @@ def unique_students(y):
             accum += 1
     return accum
 
-enrollment_num_rows = num_rows(enrollment)
-enrollment_num_unique_students = unique_students(enrollment)
+enrollment_num_rows = len(enrollments)
+enrollment_num_unique_students = unique_students(enrollments)
 
-engagement_num_rows = num_rows(daily_engagement)
-engagement_num_unique_students = unique_students(daily_engagement)
+engagement_num_rows = len(daily_engagement)
+engagement_num_unique_students = len(set([x['acct'] for x in daily_engagement]))
 
-submission_num_rows = num_rows(project_submissions)
+submission_num_rows = len(project_submissions)
 submission_num_unique_students = unique_students(project_submissions)
