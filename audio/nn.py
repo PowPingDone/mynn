@@ -45,13 +45,12 @@ if os.path.isfile('model.h5'):
 else:
     print('creating new model...')
     from keras.models import Sequential
-    from keras.layers import Activation,LSTM,Dense,Dropout,TimeDistributed
+    from keras.layers import LSTM,Dense,Dropout
     from keras.optimizers import RMSprop
     model = Sequential()
     model.add(LSTM(128, input_shape = data.shape, return_sequences=False))
     model.add(Dropout(0.4))
     model.add(Dense(1))
-    model.add(Activation('softmax'))
     model.compile(optimizer = RMSprop(lr = 0.009), loss = 'categorical_crossentropy')
 
 #------♪ AI Train ♪
