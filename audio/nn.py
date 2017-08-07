@@ -3,7 +3,7 @@
 traindir = 'shortdata'
 
 #------Imports
-import os,glob,librosa
+import os
 import numpy as np
 
 #------Seed for reproductability (insert meme numbers here.)
@@ -15,24 +15,29 @@ if os.path.isfile('preds.npy') and os.path.isfile('wavfiles.npy'):
     data = np.load('wavfiles.npy')
     Y = np.load('preds.npy')
 else:
-    import sys
+    import sys,glob,librosa
     print('create mega array of wavfiles')
-    out = [0]
-    for x in glob.glob(os.getcwd()+'/'+traindir+'/*.wav'):
-        print('loading file '+x.split('/')[-1])
-        tmp = librosa.load(x,mono=True)[0]
-        print('proccessing file '+x.split('/')[-1])
-        tmp = np.array(librosa.feature.melspectrogram(tmp),dtype=np.float32)
-        out += [x for x in tmp[0]]
-    print('concatenating tmp array')
-    tmp = np.array(out,dtype=np.float32)
+    if os.path.isfile('cache.npy'):
+        print('load wavfile cache')
+        out = np.load('cache.npy')
+    else:
+        print('generating cache.npy')
+        out = np.array([])
+        for x in glob.glob(os.getcwd()+'/'+traindir+'/*.wav'):
+            print('loading file '+x.split('/')[-1])
+            tmp = librosa.load(x,mono=True)[0]
+            print('proccessing file '+x.split('/')[-1])
+            out = np.append(out,tmp)
+        print('saving cached wavfiles')
+        np.save('cache',out)
     print('create mega array')
-    data = np.array([[tmp[x:x+128]] for x in range(0,len(tmp)-128,4)])
-    data = np.array([x[0] for x in data])
+    data = np.array([np.arange(128)])
+    for x in range(0,len(out)-1,4):
+        data= np.concatenate((data,np.array([out[x:x+128]])))
+    data = np.array(np.delete(data,0))
     np.save('wavfiles',data)
     print('create preds')
-    Y = [[x] for x in tmp[129:len(tmp):4]]
-    Y = np.array(Y,dtype=np.float32)
+    Y = np.array([[x] for x in out[0][129:len(out):4]])
     np.save('preds',Y)
     print('saved mega array as wavfiles.npy and preds as preds.npy, exiting to clear memory')
     sys.exit(1)
