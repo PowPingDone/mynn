@@ -50,7 +50,7 @@ else:
     from keras.layers import LSTM,Dense,Dropout
     from keras.layers.embeddings import Embedding
     model = Sequential()
-    model.add(Embedding(129,256,input_length=128)))
+    model.add(Embedding(129,256,input_length=128))
     model.add(LSTM(256))
     model.add(Dropout(0.4))
     model.add(Dense(1))
