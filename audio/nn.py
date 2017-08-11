@@ -15,15 +15,16 @@ if os.path.isfile('preds.npy') and os.path.isfile('wavfiles.npy'):
     data = np.load('wavfiles.npy')
     Y = np.load('preds.npy')
 else:
-    import sys,glob,librosa
+    import sys,glob
     from tqdm import tqdm
     print('create mega array of wavfiles')
     if os.path.isfile('cache.npy'):
         print('load wavfile cache')
         out = np.load('cache.npy')
     else:
+        import librosa
         print('generating cache.npy')
-        out = np.array([])
+        out = np.array([],dtype=np.float32)
         for x in glob.glob(os.getcwd()+'/'+traindir+'/*.wav'):
             print('loading file '+x.split('/')[-1])
             tmp = librosa.load(x,sr=None)[0]
@@ -31,13 +32,28 @@ else:
         print('saving cached wavfiles')
         np.save('cache',out)
     print('create mega array')
-    data = np.array([out[x:x+128] for x in tqdm(range(0,len(out)-1,4))])
-    np.save('wavfiles',data)
+    tmp = []
+    data = np.empty([1,128],dtype=np.float32)
+    reset = True
+    for x in tqdm(range(0,len(out)-129,16)):
+        tmp.append(list(out[x:x+128]))
+        if x%15000==0 and x!=0:
+            data = np.concatenate((data,tmp))
+            tmp = []
+        if reset:
+            reset = False
+            data = np.delete(data,0,0)
+        if (x//3 == (len(out)-129)//3) or ((x//3)*2 == ((len(out)-129)//3)*2):
+            np.save('wavfiles0' if (x//3 == (len(out)-129)//3) else 'wavfiles1',data)
+            del data
+            data = np.empty([1,128],dtype=np.float32)
+            reset = True
+    np.save('wavfiles2',data)
     print('create preds')
-    Y = np.array([[x] for x in out[0][129:len(out):4]])
+    Y = np.array([[x] for x in tqdm(out[0][129:len(out):8])],dtype=np.float32)
     np.save('preds',Y)
     print('saved mega array as wavfiles.npy and preds as preds.npy, exiting to clear memory')
-    sys.exit(1)
+    sys.exit(0)
 
 #------Create/Load model
 if os.path.isfile('model.h5'):
