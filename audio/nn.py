@@ -10,7 +10,7 @@ import numpy as np
 np.random.seed(1337)
 
 #------Read wavfiles/Open numpy mega array
-if os.path.isfile('preds.npy') and os.path.isfile('wavfiles2.npy'):
+if os.path.isfile('preds.npy') and os.path.isfile('wavfiles.npy'):
     print('load mega array of wavfiles')
     data = np.load('wavfiles.npy')
     Y = np.load('preds.npy')
