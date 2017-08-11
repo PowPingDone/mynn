@@ -10,7 +10,7 @@ import numpy as np
 np.random.seed(1337)
 
 #------Read wavfiles/Open numpy mega array
-if os.path.isfile('preds.npy') and os.path.isfile('wavfiles.npy'):
+if os.path.isfile('preds.npy') and os.path.isfile('wavfiles2.npy'):
     print('load mega array of wavfiles')
     data = np.load('wavfiles.npy')
     Y = np.load('preds.npy')
@@ -49,6 +49,7 @@ else:
             data = np.empty([1,128],dtype=np.float32)
             reset = True
     np.save('wavfiles2',data)
+    del data
     print('create preds')
     Y = np.array([[x] for x in tqdm(out[0][129:len(out):8])],dtype=np.float32)
     np.save('preds',Y)
