@@ -1,6 +1,8 @@
 #!/usr/bin/python3
-#------Training Dir
+#------Config
 traindir = 'shortdata'
+steps = 90
+itermax = 70
 
 #------Imports
 import os
@@ -35,17 +37,19 @@ else:
         print('create mega array')
         tmp = []
         data = np.empty([1,128],dtype=np.float32)
-        for x in tqdm(range(0,len(out)-129,22)):
+        for x in tqdm(range(0,len(out)-129,steps)):
             tmp.append(list(out[x:x+128]))
             if x%15000==0 and x!=0:
                 data = np.concatenate((data,tmp))
                 tmp = []
             if x==0:
                 data = np.delete(data,0,0)
+        data = np.concatenate((data,tmp))
+        del tmp
         np.save('wavfiles',data)
         del data
     print('create preds')
-    Y = np.array([[x] for x in tqdm(out[129:len(out):22])],dtype=np.float32)
+    Y = np.array([[x] for x in tqdm(out[129:len(out):steps])],dtype=np.float32)
     np.save('preds',Y)
     print('saved mega array as wavfiles.npy and preds as preds.npy, exiting to clear memory')
     sys.exit(0)
@@ -65,10 +69,9 @@ else:
     model.add(LSTM(256))
     model.add(Dropout(0.4))
     model.add(Dense(1))
-    model.compile(optimizer = 'rmsprop', loss = 'categorical_crossentropy')
+    model.compile(optimizer = 'rmsprop', loss = 'mse')
 
 #------♪ AI Train ♪
-itermax = 100
 from keras.callbacks import ModelCheckpoint
 callback = [ModelCheckpoint('model.h5', monitor='val_acc', verbose=1, save_best_only=True, mode='max')]
 model.fit(data, Y, verbose=1, epochs=itermax, batch_size=30, callbacks=callback)
