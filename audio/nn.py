@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 #------Config
 traindir = 'shortdata'
-steps = 90
-itermax = 70
+steps = 120
+itermax = 60
 
 #------Imports
 import os
@@ -73,6 +73,6 @@ else:
 
 #------♪ AI Train ♪
 from keras.callbacks import ModelCheckpoint
-callback = [ModelCheckpoint('model.h5', monitor='val_acc', verbose=1, save_best_only=True, mode='max')]
+callback = [ModelCheckpoint('model.h5', verbose=1, save_best_only=True)]
 model.fit(data, Y, verbose=1, epochs=itermax, batch_size=30, callbacks=callback)
 print('exiting at',str(x),'iterations')
