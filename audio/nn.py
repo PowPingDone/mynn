@@ -2,7 +2,7 @@
 #------Config
 traindir = 'shortdata'
 steps = 120
-itermax = 60
+itermax = 48 
 
 #------Imports
 import os
@@ -72,7 +72,9 @@ else:
     model.compile(optimizer = 'rmsprop', loss = 'mse')
 
 #------♪ AI Train ♪
-from keras.callbacks import ModelCheckpoint
-callback = [ModelCheckpoint('model.h5', verbose=1, save_best_only=True)]
-model.fit(data, Y, verbose=1, epochs=itermax, batch_size=30, callbacks=callback)
-print('exiting at',str(x),'iterations')
+for x in range(itermax):
+    print("Iter:"+str(x)+"/"+str(itermax))
+    model.fit(data, Y, verbose=1, epochs=1, batch_size=60)
+    model.save('model.h5')
+
+print('exiting at',x,'iterations')
