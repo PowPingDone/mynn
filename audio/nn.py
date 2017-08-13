@@ -1,15 +1,15 @@
 #!/usr/bin/python3
 #------Config
 traindir = 'shortdata'
-steps = 120
-itermax = 48 
+steps = 100
+itermax = 51
 
 #------Imports
 import os
 import numpy as np
 
 #------Seed for reproductability (insert meme numbers here.)
-np.random.seed(1337)
+#np.random.seed(1337)
 
 #------Read wavfiles/Open numpy mega array
 if os.path.isfile('preds.npy') and os.path.isfile('wavfiles.npy'):
@@ -67,14 +67,15 @@ else:
     model = Sequential()
     model.add(Embedding(129,256,input_length=128))
     model.add(LSTM(256))
-    model.add(Dropout(0.4))
-    model.add(Dense(1))
+    model.add(Dropout(0.5))
+    model.add(Dense(1,activation = 'sigmoid'))
     model.compile(optimizer = 'rmsprop', loss = 'mse')
 
 #------♪ AI Train ♪
 for x in range(itermax):
     print("Iter:"+str(x)+"/"+str(itermax))
-    model.fit(data, Y, verbose=1, epochs=1, batch_size=60)
+    model.fit(data, Y, verbose=1, epochs=1, batch_size=1350)
+    np.random.seed(np.random.randint(-(2**32-33),2**32-33))
     model.save('model.h5')
 
 print('exiting at',x,'iterations')
