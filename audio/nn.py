@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 #------Config
 traindir = 'shortdata'
-steps = 100
-itermax = 51
+steps = 63
+itermax = 10
 
 #------Imports
 import os
@@ -64,18 +64,23 @@ else:
     from keras.models import Sequential
     from keras.layers import LSTM,Dense,Dropout
     from keras.layers.embeddings import Embedding
+    from keras.layers.advanced_activations import LeakyReLU
+    from keras.optimizers import RMSprop
+    from keras.initializers import RandomUniform
+    RandomUniform(minval = -0.1, maxval = 0.1)
     model = Sequential()
     model.add(Embedding(129,256,input_length=128))
     model.add(LSTM(256))
     model.add(Dropout(0.5))
-    model.add(Dense(1,activation = 'sigmoid'))
-    model.compile(optimizer = 'rmsprop', loss = 'mse')
+    model.add(Dense(1))
+    model.add(LeakyReLU())
+    model.compile(optimizer = RMSprop(lr=0.01), loss = 'binary_crossentropy', metrics = ['accuracy'])
 
 #------♪ AI Train ♪
 for x in range(itermax):
     print("Iter:"+str(x)+"/"+str(itermax))
-    model.fit(data, Y, verbose=1, epochs=1, batch_size=1350)
-    np.random.seed(np.random.randint(-(2**32-33),2**32-33))
+    model.fit(data, Y, verbose=1, epochs=1, batch_size=1296)
+    np.random.seed(np.random.randint(0,2**32-1))
     model.save('model.h5')
 
 print('exiting at',x,'iterations')

@@ -29,6 +29,8 @@ else:
 if randomdata: #------Generate random data
     print('generating random data')
     data = np.random.random_sample((1,128))
+    for x in range(0,128,2):
+        data[0,x] = -data[0,x]
 else: #------Grab data from sound cache
     print('getting data from cache.npy')
     tmp = np.load('cache.npy')
@@ -42,3 +44,6 @@ print('predicting values')
 for _ in tqdm(range(valuesgen)):
     out += [float(model.predict(data))]
     data = np.array([[float(data[0][x+1]) for x in range(127)]+[out[-1]]],dtype=np.float32)
+    if _ == 10:
+        print(out)
+librosa.out.write_wav('out.wav',np.array(out),sampling)
