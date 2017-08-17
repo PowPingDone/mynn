@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 #------Config
 traindir = 'shortdata'
-steps = 63
+steps = 65
 itermax = 10
 
 #------Imports
@@ -17,17 +17,18 @@ if os.path.isfile('preds.npy') and os.path.isfile('wavfiles.npy'):
     data = np.load('wavfiles.npy')
     Y = np.load('preds.npy')
 else:
-    import sys,glob
+    from glob import glob
     from tqdm import tqdm
+    from sys import exit
     print('create mega array of wavfiles')
     if os.path.isfile('cache.npy'):
         print('load wavfile cache')
         out = np.load('cache.npy')
     else:
-        import librosa,glob
+        import librosa
         print('generating cache.npy')
         out = np.array([],dtype=np.float32)
-        for x in glob.glob(os.getcwd()+'/'+traindir+'/*.wav'):
+        for x in glob(os.getcwd()+'/'+traindir+'/*.wav'):
             print('loading file '+x.split('/')[-1])
             tmp = librosa.load(x,sr=None)[0]
             out = np.append(out,tmp)
@@ -52,7 +53,7 @@ else:
     Y = np.array([[x] for x in tqdm(out[129:len(out):steps])],dtype=np.float32)
     np.save('preds',Y)
     print('saved mega array as wavfiles.npy and preds as preds.npy, exiting to clear memory')
-    sys.exit(0)
+    exit(0)
 
 #------Create/Load model
 if os.path.isfile('model.h5'):

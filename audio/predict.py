@@ -2,7 +2,7 @@
 #------Config
 model = "model.h5"
 randomdata = False
-valuesgen = 900000
+valuesgen = 200000
 output = True
 sampling = 16000
 
@@ -38,7 +38,7 @@ else: #------Grab data from sound cache
     data = np.array([list(tmp[int(x):int(x)+128])],dtype=np.float32)
     del tmp,x
 
-#------Predict
+#------∿ Predict ∿
 out = []
 print('predicting values')
 for _ in tqdm(range(valuesgen)):
@@ -46,4 +46,7 @@ for _ in tqdm(range(valuesgen)):
     data = np.array([[float(data[0][x+1]) for x in range(127)]+[out[-1]]],dtype=np.float32)
     if _ == 10:
         print(out)
-librosa.out.write_wav('out.wav',np.array(out),sampling)
+
+#------Writeout
+if output:
+    librosa.output.write_wav('out.wav',np.array(out),sampling,norm=True)
