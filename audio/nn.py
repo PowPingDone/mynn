@@ -80,7 +80,7 @@ else:
 #------♪ AI Train ♪
 for x in range(itermax):
     print("Iter:"+str(x)+"/"+str(itermax))
-    model.fit(data, Y, verbose=1, epochs=1, batch_size=1296)
+    model.fit(data, Y, verbose=1, epochs=1, batch_size=1225)
     np.random.seed(np.random.randint(0,2**32-1))
     model.save('model.h5')
 
