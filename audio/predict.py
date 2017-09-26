@@ -40,7 +40,7 @@ else: #------Grab data from sound cache
 
 #------∿ Predict ∿
 out = []
-print('predicting values')
+print('predicting values, generating around {:01.2f} seconds of data'.format(str(valuesgen/sampling)))
 for _ in tqdm(range(valuesgen)):
     out += [float(model.predict(data))]
     data = np.array([[float(data[0][x+1]) for x in range(127)]+[out[-1]]],dtype=np.float32)
