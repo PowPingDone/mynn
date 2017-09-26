@@ -63,19 +63,26 @@ if os.path.isfile('model.h5'):
 else:
     print('creating new model...')
     from keras.models import Sequential
-    from keras.layers import LSTM,Dense,Dropout
-    from keras.layers.embeddings import Embedding
+    from keras.layers import LSTM,Dense,Dropout,Conv1D,MaxPooling1D,Flatten,TimeDistributed
     from keras.layers.advanced_activations import LeakyReLU
+    from keras.layers.embeddings import Embedding
     from keras.optimizers import RMSprop
     from keras.initializers import RandomUniform
     RandomUniform(minval = -0.1, maxval = 0.1)
     model = Sequential()
     model.add(Embedding(129,256,input_length=128))
-    model.add(LSTM(256))
-    model.add(Dropout(0.5))
+    model.add(Dropout(0.3))
+    model.add(Conv1D(64,5,padding='valid',activation=LeakyReLU(),strides=1))
+    model.add(MaxPooling1D(pool_size=4))
+    model.add(LSTM(256,return_sequences=True))
+    model.add(Dropout(0.3))
+    model.add(LSTM(128,return_sequences=True))
+    model.add(Dropout(0.3))
+    model.add(LSTM(64))
+    model.add(Dropout(0.3))
     model.add(Dense(1))
     model.add(LeakyReLU())
-    model.compile(optimizer = RMSprop(lr=0.01), loss = 'binary_crossentropy', metrics = ['accuracy'])
+    model.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy'])
 
 #------♪ AI Train ♪
 for x in range(itermax):
