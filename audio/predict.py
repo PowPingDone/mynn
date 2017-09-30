@@ -29,21 +29,21 @@ else:
 if randomdata: #------Generate random data
     print('generating random data')
     data = np.random.random_sample((1,128))
-    for x in range(0,128,2):
+    for x in range(0,256,2):
         data[0,x] = -data[0,x]
 else: #------Grab data from sound cache
     print('getting data from cache.npy')
     tmp = np.load('cache.npy')
-    x = np.random.randint(len(tmp)-129)
-    data = np.array([list(tmp[int(x):int(x)+128])],dtype=np.float32)
+    x = np.random.randint(len(tmp)-257)
+    data = np.array([list(tmp[int(x):int(x)+256])],dtype=np.float32)
     del tmp,x
 
 #------∿ Predict ∿
 out = []
-print('predicting values, generating around {:01.2f} seconds of data'.format(str(valuesgen/sampling)))
+print('predicting values, generating around {:01.2f} seconds of data'.format(valuesgen/sampling))
 for _ in tqdm(range(valuesgen)):
     out += [float(model.predict(data))]
-    data = np.array([[float(data[0][x+1]) for x in range(127)]+[out[-1]]],dtype=np.float32)
+    data = np.array([[float(data[0][x+1]) for x in range(255)]+[out[-1]]],dtype=np.float32)
     if _ == 10:
         print(out)
 
