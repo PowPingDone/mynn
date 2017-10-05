@@ -20,6 +20,7 @@ else:
     from glob import glob
     from tqdm import tqdm
     from sys import exit
+    from sklearn.preprocessing import normalize
     print('create mega array of wavfiles')
     if os.path.isfile('cache.npy'):
         print('load wavfile cache')
@@ -37,9 +38,9 @@ else:
     if not os.path.isfile('wavfiles.npy'):
         print('create mega array')
         tmp = []
-        data = np.empty([1,256],dtype=np.float32)
-        for x in tqdm(range(0,len(out)-257,steps)):
-            tmp.append(list(out[x:x+256]))
+        data = np.empty([1,128],dtype=np.float32)
+        for x in tqdm(range(0,len(out)-129,steps)):
+            tmp.append(list(out[x:x+128]))
             if x%15000==0 and x!=0:
                 data = np.concatenate((data,tmp))
                 tmp = []
@@ -47,10 +48,10 @@ else:
                 data = np.delete(data,0,0)
         data = np.concatenate((data,tmp))
         del tmp
-        np.save('wavfiles',data)
+        np.save('wavfiles',normalize(data))
         del data
     print('create preds')
-    Y = np.array([[x] for x in tqdm(out[257:len(out):steps])],dtype=np.float32)
+    Y = np.array([[x] for x in tqdm(out[129:len(out):steps])],dtype=np.float32)
     np.save('preds',Y)
     print('saved mega array as wavfiles.npy and preds as preds.npy, exiting to clear memory')
     exit(0)
@@ -70,22 +71,21 @@ else:
     from keras.initializers import RandomUniform
     RandomUniform(minval = -0.1, maxval = 0.1)
     model = Sequential()
-    model.add(Embedding(257,512,input_length=256))
+    model.add(Embedding(129,256,input_length=128))
     model.add(Dropout(0.3))
     model.add(Conv1D(128,5,padding='valid',activation='relu',strides=1))
     model.add(MaxPooling1D(pool_size=4))
     model.add(Dropout(0.3))
     model.add(LSTM(144,return_sequences=True))
-    model.add(LSTM(100,return_sequences=True))
     model.add(LSTM(64))
     model.add(Dense(1))
-    model.add(LeakyReLU())
+    #model.add(LeakyReLU())
     model.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy'])
 
 #------♪ AI Train ♪
 for x in range(itermax):
     print("Iter:"+str(x)+"/"+str(itermax))
-    model.fit(data, Y, verbose=1, epochs=1, batch_size=729)
+    model.fit(data, Y, verbose=1, epochs=1, batch_size=1024)
     np.random.seed(np.random.randint(0,2**32-1))
     model.save('model.h5')
 
