@@ -5,6 +5,8 @@ randomdata = False
 valuesgen = 200000
 output = True
 sampling = 16000
+size = 32
+
 
 #------Imports
 import os
@@ -28,14 +30,14 @@ else:
 #------Get first 128 values
 if randomdata: #------Generate random data
     print('generating random data')
-    data = np.random.random_sample((1,128))
-    for x in range(0,256,2):
+    data = np.random.random_sample((1,size))
+    for x in range(0,size,2):
         data[0,x] = -data[0,x]
 else: #------Grab data from sound cache
     print('getting data from cache.npy')
     tmp = np.load('cache.npy')
-    x = np.random.randint(len(tmp)-257)
-    data = np.array([list(tmp[int(x):int(x)+256])],dtype=np.float32)
+    x = np.random.randint(len(tmp)-(size+1))
+    data = np.array([list(tmp[int(x):int(x)+size])],dtype=np.float32)
     del tmp,x
 
 #------∿ Predict ∿
@@ -43,9 +45,10 @@ out = []
 print('predicting values, generating around {:01.2f} seconds of data'.format(valuesgen/sampling))
 for _ in tqdm(range(valuesgen)):
     out += [float(model.predict(data))]
-    data = np.array([[float(data[0][x+1]) for x in range(255)]+[out[-1]]],dtype=np.float32)
+    data = np.array([[float(data[0][x+1]) for x in range(size-1)]+[out[-1]]],dtype=np.float32)
     if _ == 10:
         print(out)
+        print(out[0]==out[1])
 
 #------Writeout
 if output:
