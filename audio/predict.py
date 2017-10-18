@@ -5,7 +5,7 @@ randomdata = False
 valuesgen = 200000
 output = True
 sampling = 16000
-size = 32
+size = 256
 
 
 #------Imports

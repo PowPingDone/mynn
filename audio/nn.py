@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 #------Config
 traindir = 'shortdata'
-steps = 75
+steps = 70
 itermax = 10
-size = 32
+size = 256
 
 #------Imports
 import os
@@ -52,7 +52,7 @@ else:
         np.save('wavfiles',normalize(data))
         del data
     print('create preds')
-    Y = np.array([[x] for x in tqdm(out[size:len(out):steps])],dtype=np.float32)
+    Y = np.array([[x] for x in tqdm(out[size+1:len(out):steps])],dtype=np.float32)
     np.save('preds',Y)
     print('saved mega array as wavfiles.npy and preds as preds.npy, exiting to clear memory')
     exit(0)
@@ -86,7 +86,7 @@ else:
 #------♪ AI Train ♪
 for x in range(itermax):
     print("Iter:"+str(x)+"/"+str(itermax))
-    model.fit(data, Y, verbose=1, epochs=1, batch_size=1024)
+    model.fit(data, Y, verbose=1, epochs=1, batch_size=33**2)
     np.random.seed(np.random.randint(0,2**32-1))
     model.save('model.h5')
 
